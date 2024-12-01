@@ -14,13 +14,15 @@ webscreenshots_path=$name".all.screenshots"
 katana_path=$name".all.katana"
 gau_path=$name".all.gau"
 js_subdomains_path=$name".all.js_subdomains"
+forbidden_path=$name".all.forbidden"
+vhost_path=$name".all.vhost_support"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
 
 if [ $bruteforce = brute ]; then
     puredns bruteforce /opt/SecLists/Discovery/DNS/subdomains-top1million-110000.txt -d $resolved_path --write $bruteforced_path;
-    cat $resolved_path $bruteforced_path | sort -u | tee $final_list
+    cat $resolved_path $bruteforced_path | sort -u | tee $final_list;
 else
     cat $resolved_path | sort -u | tee $final_list;
 fi
@@ -39,3 +41,10 @@ cat $katana_path | grep -oP 'https?://[a-zA-Z0-9.-]+(:[0-9]+)?/' | sort -u | tee
 
 # archive links
 cat $webservers_path | gau --o $gau_path;
+
+# get 403 401 webservers ( used on later stages )
+
+cat $webservers_path | httpx -timeout 30 -mc 401,403 -o $forbidden_path;
+
+# vhost support
+cat $webservers_path | httpx -timeout 30 -vhost -o $vhost_path;
