@@ -16,6 +16,9 @@ gau_path=$name".all.gau"
 js_subdomains_path=$name".all.js_subdomains"
 forbidden_path=$name".all.forbidden"
 vhost_path=$name".all.vhost_support"
+ips_path=$name".all.ips"
+ips_ports_path=$name".all.ips_ports"
+ips_webservers=$name".all.ips_webservers"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
@@ -48,3 +51,13 @@ cat $webservers_path | httpx -timeout 30 -mc 401,403 -o $forbidden_path;
 
 # vhost support
 cat $webservers_path | httpx -timeout 30 -vhost -o $vhost_path;
+
+# get ip by host
+cat $final_list | dnsx -silent -a -resp-only | sort -u | tee $ips_path;
+
+# perform a naabu all scan
+naabu -list $ips_path -Pn -exclude-cdn -p - -o $ips_ports_path;
+
+# perform http probing on ips ports
+
+cat $ips_ports_path | httpx -timeout 30 -o $ips_webservers;
