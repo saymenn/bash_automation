@@ -34,7 +34,7 @@ fi
 cat $final_list | httprobe -p http:80 -p https:443 -p http:8080 -p https:9443 -p https:8443 -p http:8081 -p http:8000 -p http:3000 -p http:10000 | tee $webservers_path;
 
 # screenshots
-cat $webservers_path | httpx -st 30 -timeout 30 -ss -o $webscreenshots_path;
+cat $webservers_path | httpx -st 30 -timeout 30 -ss;
 
 # crawling
 katana -list $webservers_path -duc -silent -nc -jc -jsl -kf -fx -xhr -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -o $katana_path;
@@ -59,5 +59,4 @@ cat $final_list | dnsx -silent -a -resp-only | sort -u | tee $ips_path;
 naabu -list $ips_path -Pn -exclude-cdn -p - -o $ips_ports_path;
 
 # perform http probing on ips ports
-
-cat $ips_ports_path | httpx -timeout 30 -o $ips_webservers;
+cat $ips_ports_path | httpx -timeout 30 -sc -title -td -location -o $ips_webservers;
