@@ -22,6 +22,8 @@ ips_webservers=$name".all.ips_webservers"
 traversal_scan_1=$name".all.scan_traversal_1"
 scan_traversal_2=$name".all.scan_traversal_2"
 scan_uri_openredir=$name".all.scan_uri_openredir"
+scan_reflected_xss=$name".all.scan_reflected_xss"
+scan_get_param_openredir=$name".all.scan_get_param_openredir"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
@@ -71,4 +73,10 @@ if [ $scan = scan ]; then
 
     # performing uri based open redirect scan
     python3 /opt/uri_redirects.py $webservers_path | tee $scan_uri_openredir;
+
+    # performing reflected xss scan
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '"><img/src=x onerror=confirm(1)>' | httpx -timeout 30 -mc 200 -mr '<img/src' -o $scan_reflected_xss;
+
+    # performing open redirect scan on get params
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 30 -mc 301,302,303,308 -mr 'example.com' -o $scan_get_param_openredir;
 fi
