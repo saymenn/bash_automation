@@ -24,6 +24,7 @@ scan_traversal_2=$name".all.scan_traversal_2"
 scan_uri_openredir=$name".all.scan_uri_openredir"
 scan_reflected_xss=$name".all.scan_reflected_xss"
 scan_get_param_openredir=$name".all.scan_get_param_openredir"
+scan_ssti=$name".all.scan_ssti"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
@@ -79,4 +80,5 @@ if [ $scan = scan ]; then
 
     # performing open redirect scan on get params
     cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 30 -mc 301,302,303,308 -mr 'example.com' -o $scan_get_param_openredir;
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '<%= 5252 *  111%>@(5252*111)${{5252*111}}{{5252*111}}' | httpx -timeout 30 -mc 200 -mr '582972' -o $scan_ssti;
 fi
