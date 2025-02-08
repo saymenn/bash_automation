@@ -16,9 +16,6 @@ gau_path=$name".all.gau"
 js_subdomains_path=$name".all.js_subdomains"
 forbidden_path=$name".all.forbidden"
 vhost_path=$name".all.vhost_support"
-ips_path=$name".all.ips"
-ips_ports_path=$name".all.ips_ports"
-ips_webservers=$name".all.ips_webservers"
 traversal_scan_1=$name".all.scan_traversal_1"
 scan_traversal_2=$name".all.scan_traversal_2"
 scan_uri_openredir=$name".all.scan_uri_openredir"
@@ -57,9 +54,6 @@ cat $webservers_path | httpx -timeout 30 -mc 401,403 -o $forbidden_path;
 
 # vhost support
 cat $webservers_path | httpx -timeout 30 -vhost -o $vhost_path;
-
-# get ip by host
-cat $final_list | dnsx -silent -a -resp-only | sort -u | tee $ips_path;
 
 if [ $scan = scan ]; then
     # performing path traversal scans
