@@ -65,7 +65,7 @@ if [ $scan = scan ]; then
     python3 /opt/uri_redirects.py $webservers_path | tee $scan_uri_openredir;
 
     # performing reflected xss scan
-    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '"><img/src=x onerror=confirm(1)>' | httpx -timeout 30 -mc 200 -mr '<img/src' -o $scan_reflected_xss;
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '"><saymenn>' | httpx -timeout 30 -mc 200 -mr '<saymenn>' -o $scan_reflected_xss;
 
     # performing open redirect scan on get params
     # OUT OF SERVICE TILL REWRITTEN CORRECTLY ==> 
@@ -74,7 +74,7 @@ if [ $scan = scan ]; then
     cat $katana_path $gau_path | sort -u | grep "?" | qsreplace '<%= 5252 *  111%>@(5252*111)${{5252*111}}{{5252*111}}' | httpx -timeout 30 -mc 200 -mr '582972' -o $scan_ssti;
 
     # scan get based ssrf
-    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 
+    cat $katana_path $gau_path | sort -u | grep "?" | qsreplace 'https://example.com' | httpx -timeout 10 -mr 'domain in literature without prior' -o $scan_get_ssrf; 
 fi
 
 #todo:
